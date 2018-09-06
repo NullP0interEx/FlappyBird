@@ -1,0 +1,28 @@
+<component name="libraryTable">
+  <library name="neuroph-adapters-2.94-javadoc">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-adapters-2.94.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-contrib-2.94.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-core-2.94.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-imgrec-2.94.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-ocr-2.94.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-samples-2.94.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-adapters-2.94-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-contrib-2.94-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-core-2.94-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-imgrec-2.94-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-ocr-2.94-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-samples-2.94-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-adapters-2.94-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-contrib-2.94-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-core-2.94-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-imgrec-2.94-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-ocr-2.94-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../neuroph-2.94/neuroph-samples-2.94-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

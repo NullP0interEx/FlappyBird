@@ -1,3 +1,7 @@
+import org.neuroph.core.NeuralNetwork;
+import org.neuroph.nnet.MultiLayerPerceptron;
+import org.neuroph.util.TransferFunctionType;
+
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
@@ -10,6 +14,7 @@ public class Bird {
     public int height;
 
     public boolean dead;
+    public int score = 0;
 
     public double yvel;
     public double gravity;
@@ -19,8 +24,13 @@ public class Bird {
 
     private Image image;
     private Keyboard keyboard;
+    public double horizontalLength;
+    public double heightDifference;
 
-    public Bird() {
+
+    private NeuralNetwork ann;
+
+    public Bird(NeuralNetwork ann) {
         x = 100;
         y = 150;
         yvel = 0;
@@ -32,6 +42,9 @@ public class Bird {
         dead = false;
 
         keyboard = Keyboard.getInstance();
+        if(ann == null)
+            ann = getNewNetwork();
+        this.ann = ann;
     }
 
     public void update() {
@@ -40,6 +53,8 @@ public class Bird {
         if (jumpDelay > 0)
             jumpDelay--;
 
+        System.out.println("horizontalLength: "+ horizontalLength +" heightDifference: "+ heightDifference +" AI:");
+        askToFlap(horizontalLength, heightDifference);
         if (!dead && keyboard.isDown(KeyEvent.VK_SPACE) && jumpDelay <= 0) {
             yvel = -10;
             jumpDelay = 10;
@@ -70,5 +85,30 @@ public class Bird {
         r.transform.translate(-width / 2, -height / 2);
 
         return r;
+    }
+
+    public void askToFlap(double horizontalLength, double heightDifference){
+        ann.setInput(horizontalLength, heightDifference);
+        ann.calculate();
+        double[] networkOutputOne = ann.getOutput();
+        System.out.println("horizontalLength: "+ horizontalLength +" heightDifference: "+ heightDifference +" AI:" + networkOutputOne[0]);
+        if(networkOutputOne[0] > 0.5){
+            yvel = -10;
+            jumpDelay = 10;
+        }
+
+    }
+
+    private NeuralNetwork getNewNetwork() {
+        MultiLayerPerceptron myMlPerceptron = new MultiLayerPerceptron(TransferFunctionType.GAUSSIAN, 2, 6, 1);
+        return myMlPerceptron;
+    }
+
+    public NeuralNetwork getAnn() {
+        return ann;
+    }
+
+    public void setAnn(NeuralNetwork ann) {
+        this.ann = ann;
     }
 }
