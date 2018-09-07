@@ -1,10 +1,20 @@
 import org.neuroph.core.NeuralNetwork;
+import org.neuroph.core.data.DataSet;
+import org.neuroph.core.data.DataSetRow;
 import org.neuroph.nnet.MultiLayerPerceptron;
+import org.neuroph.nnet.Perceptron;
+import org.neuroph.nnet.learning.BackPropagation;
 import org.neuroph.util.TransferFunctionType;
 
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 
 public class Bird {
 
@@ -14,6 +24,7 @@ public class Bird {
     public int height;
 
     public boolean dead;
+    public boolean learn;
     public int score = 0;
 
     public double yvel;
@@ -26,6 +37,8 @@ public class Bird {
     private Keyboard keyboard;
     public double horizontalLength;
     public double heightDifference;
+    private DataSet ds = new DataSet(2, 1);
+    private RingBuffer<double[]> dataBuffer = new RingBuffer<>(300);
 
 
     private NeuralNetwork ann;
@@ -53,11 +66,40 @@ public class Bird {
         if (jumpDelay > 0)
             jumpDelay--;
 
-        System.out.println("horizontalLength: "+ horizontalLength +" heightDifference: "+ heightDifference +" AI:");
-        askToFlap(horizontalLength, heightDifference);
         if (!dead && keyboard.isDown(KeyEvent.VK_SPACE) && jumpDelay <= 0) {
+            learn = true;
             yvel = -10;
             jumpDelay = 10;
+            String csv = "";
+            double percentageThreshold = 0.05;
+            for(int i=1; i< dataBuffer.size() + 1; i++){
+                double[] dsRow = dataBuffer.pop();
+                ds.add(new DataSetRow(dsRow, new double[]{( (i/(double)dataBuffer.size()) < percentageThreshold ? 0 : (i/(double)dataBuffer.size())  )}));
+                csv += dsRow[0] + "," + dsRow[1] + "," + ( (i/(double)dataBuffer.size()) < percentageThreshold ? 0 : (i/(double)dataBuffer.size())  ) + "\n";
+                System.out.println("horizontalLength: "+ dsRow[0] +" heightDifference: "+ dsRow[1] +" LEARN:" + ( (i/(double)dataBuffer.size()) < percentageThreshold ? 0 : (i/(double)dataBuffer.size())  ));
+            }
+            try {
+                Files.write(Paths.get("export.txt"), csv.getBytes(), StandardOpenOption.APPEND);
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+            if(ds.size() > 0) {
+                System.out.println("Start learning - elements: " + ds.size());
+                BackPropagation backPropagation = new BackPropagation();
+                backPropagation.setMaxIterations(10000);
+                ann.learn(ds, backPropagation);
+                System.out.println("End learning");
+                ds.clear();
+            }
+        }
+
+        if(jumpDelay <= 0)
+            askToFlap(horizontalLength, heightDifference);
+
+        if (keyboard.isDown(KeyEvent.VK_ENTER)) {
+
+            ann.save("myFlappyPerceptron.nnet");
+            System.out.println("End save");
         }
 
         y += (int)yvel;
@@ -88,20 +130,25 @@ public class Bird {
     }
 
     public void askToFlap(double horizontalLength, double heightDifference){
-        ann.setInput(horizontalLength, heightDifference);
-        ann.calculate();
-        double[] networkOutputOne = ann.getOutput();
-        System.out.println("horizontalLength: "+ horizontalLength +" heightDifference: "+ heightDifference +" AI:" + networkOutputOne[0]);
-        if(networkOutputOne[0] > 0.5){
-            yvel = -10;
-            jumpDelay = 10;
+        if(heightDifference != 0 && horizontalLength != 0)
+            dataBuffer.push(new double[] {horizontalLength, heightDifference});
+        if(!learn){
+            ann.setInput(horizontalLength, heightDifference);
+            ann.calculate();
+            double[] networkOutputOne = ann.getOutput();
+            System.out.println("horizontalLength: "+ horizontalLength +" heightDifference: "+ heightDifference +" AI:" + networkOutputOne[0]);
+            if(networkOutputOne[0] > 0.8){
+                yvel = -10;
+                jumpDelay = 10;
+            }
         }
 
     }
 
     private NeuralNetwork getNewNetwork() {
-        MultiLayerPerceptron myMlPerceptron = new MultiLayerPerceptron(TransferFunctionType.GAUSSIAN, 2, 6, 1);
-        return myMlPerceptron;
+        //MultiLayerPerceptron ann = new MultiLayerPerceptron(TransferFunctionType.STEP, 2, 2*2+1, 1);
+        //NeuralNetwork ann = new Perceptron(2, 1);
+        return (new File("myFlappyPerceptron_backup.nnet").exists() ? NeuralNetwork.load("myFlappyPerceptron_backup.nnet") : new MultiLayerPerceptron(TransferFunctionType.STEP, 2, 2*2+1, 1));
     }
 
     public NeuralNetwork getAnn() {

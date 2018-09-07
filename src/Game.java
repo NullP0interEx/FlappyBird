@@ -1,4 +1,7 @@
+import org.neuroph.core.NeuralNetwork;
+
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.ArrayList;
 
 public class Game {
@@ -11,7 +14,7 @@ public class Game {
     private int restartDelay;
     private int pipeDelay;
 
-    private ArrayList<Bird> birds = new ArrayList<>();
+    public static ArrayList<Bird> birds = new ArrayList<>();
     private ArrayList<Pipe> pipes;
     private Keyboard keyboard;
 
@@ -34,8 +37,8 @@ public class Game {
         restartDelay = 0;
         pipeDelay = 0;
         birds.clear();
-        for (int i = 0; i < 10; i++)
-            birds.add(new Bird(null));
+        for (int i = 0; i < App.BIRD_COUNT; i++)
+            birds.add(new Bird((new File("myFlappyPerceptron.nnet").exists() ? NeuralNetwork.load("myFlappyPerceptron.nnet") : null)));
         pipes = new ArrayList<Pipe>();
     }
 
@@ -65,7 +68,7 @@ public class Game {
         }
         for (Bird bird : birds) {
             if(nearestPipe != null) {
-                bird.horizontalLength = (nearestPipe.x + nearestPipe.width) - 100;
+                bird.horizontalLength = (nearestPipe.x /*+ nearestPipe.width*/) - 100;
                 if (nearestPipe.orientation.equals("north"))
                     bird.heightDifference = (nearestPipe.y - 87.5) - bird.y;
                 else

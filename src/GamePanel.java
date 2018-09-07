@@ -27,8 +27,13 @@ public class GamePanel extends JPanel implements Runnable {
             else
                 g.drawImage(r.image, r.x, r.y, null);
 
-
-        g2D.setColor(Color.BLACK);
+        for(Bird bird : Game.birds){
+            int lineY = (int)bird.heightDifference + bird.y;
+            g.setColor(Color.BLACK);
+            g.drawLine(0, lineY, 500, lineY);
+            g.setColor(Color.RED);
+            g.drawLine(bird.x, bird.y, bird.x + (int)bird.horizontalLength, bird.y);
+        }
 
         if (!game.started) {
             g2D.setFont(new Font("TimesRoman", Font.PLAIN, 20));
