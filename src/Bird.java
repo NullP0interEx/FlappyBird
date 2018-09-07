@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public class Bird {
 
     private final static boolean IS_BOT = false;
+    private final static boolean SELD_LEARNING = false;
 
     public int x;
     public int y;
@@ -113,7 +114,7 @@ public class Bird {
 
 
         if(IS_BOT)
-        if(heightDifference < -15 /*&& horizontalLength > 20 */&& heightDifference < 10)
+        if(heightDifference < -15 /*&& horizontalLength > 20 */&& heightDifference < 15)
             flap();
 
         if(!IS_BOT){
@@ -121,7 +122,7 @@ public class Bird {
             ann.calculate();
             double[] networkOutputOne = ann.getOutput();
             System.out.println("horizontalLength: "+ horizontalLength +" heightDifference: "+ heightDifference +" AI:" + networkOutputOne[0]);
-            if(networkOutputOne[0] > 0.9){
+            if(networkOutputOne[0] > 0.90){
                 flap();
             }
         }
