@@ -56,7 +56,7 @@ public class Game {
 
         Pipe nearestPipe = null;
         for (Pipe pipe : pipes) {
-            if(pipe.x < 100)
+            if(pipe.x + pipe.width + 10 < 100)
                 continue;
             if(nearestPipe == null) {
                 nearestPipe = pipe;

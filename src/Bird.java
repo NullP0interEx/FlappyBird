@@ -18,13 +18,15 @@ import java.util.ArrayList;
 
 public class Bird {
 
+    private final static boolean IS_BOT = false;
+
     public int x;
     public int y;
     public int width;
     public int height;
 
     public boolean dead;
-    public boolean learn;
+
     public int score = 0;
 
     public double yvel;
@@ -67,37 +69,13 @@ public class Bird {
             jumpDelay--;
 
         if (!dead && keyboard.isDown(KeyEvent.VK_SPACE) && jumpDelay <= 0) {
-            learn = true;
-            yvel = -10;
-            jumpDelay = 10;
-            String csv = "";
-            double percentageThreshold = 0.05;
-            for(int i=1; i< dataBuffer.size() + 1; i++){
-                double[] dsRow = dataBuffer.pop();
-                ds.add(new DataSetRow(dsRow, new double[]{( (i/(double)dataBuffer.size()) < percentageThreshold ? 0 : (i/(double)dataBuffer.size())  )}));
-                csv += dsRow[0] + "," + dsRow[1] + "," + ( (i/(double)dataBuffer.size()) < percentageThreshold ? 0 : (i/(double)dataBuffer.size())  ) + "\n";
-                System.out.println("horizontalLength: "+ dsRow[0] +" heightDifference: "+ dsRow[1] +" LEARN:" + ( (i/(double)dataBuffer.size()) < percentageThreshold ? 0 : (i/(double)dataBuffer.size())  ));
-            }
-            try {
-                Files.write(Paths.get("export.txt"), csv.getBytes(), StandardOpenOption.APPEND);
-            }catch (IOException e) {
-                e.printStackTrace();
-            }
-            if(ds.size() > 0) {
-                System.out.println("Start learning - elements: " + ds.size());
-                BackPropagation backPropagation = new BackPropagation();
-                backPropagation.setMaxIterations(10000);
-                ann.learn(ds, backPropagation);
-                System.out.println("End learning");
-                ds.clear();
-            }
+            flap();
         }
 
         if(jumpDelay <= 0)
             askToFlap(horizontalLength, heightDifference);
 
         if (keyboard.isDown(KeyEvent.VK_ENTER)) {
-
             ann.save("myFlappyPerceptron.nnet");
             System.out.println("End save");
         }
@@ -132,17 +110,52 @@ public class Bird {
     public void askToFlap(double horizontalLength, double heightDifference){
         if(heightDifference != 0 && horizontalLength != 0)
             dataBuffer.push(new double[] {horizontalLength, heightDifference});
-        if(!learn){
+
+
+        if(IS_BOT)
+        if(heightDifference < -15 /*&& horizontalLength > 20 */&& heightDifference < 10)
+            flap();
+
+        if(!IS_BOT){
             ann.setInput(horizontalLength, heightDifference);
             ann.calculate();
             double[] networkOutputOne = ann.getOutput();
             System.out.println("horizontalLength: "+ horizontalLength +" heightDifference: "+ heightDifference +" AI:" + networkOutputOne[0]);
-            if(networkOutputOne[0] > 0.8){
-                yvel = -10;
-                jumpDelay = 10;
+            if(networkOutputOne[0] > 0.9){
+                flap();
             }
         }
 
+    }
+
+    private void flap(){
+        yvel = -10;
+        jumpDelay = 10;
+
+        if(IS_BOT){
+            String csv = "";
+            double percentageThreshold = 0.05;
+            for(int i=1; i< dataBuffer.size() + 1; i++){
+                double[] dsRow = dataBuffer.pop();
+                //ds.add(new DataSetRow(dsRow, new double[]{( (i/(double)dataBuffer.size()) < percentageThreshold ? 0 : (i/(double)dataBuffer.size())  )}));
+                csv += dsRow[0] + "," + dsRow[1] + "," + ( (i/(double)dataBuffer.size()) < percentageThreshold ? 0 : (i/(double)dataBuffer.size())  ) + "\n";
+                //System.out.println("horizontalLength: "+ dsRow[0] +" heightDifference: "+ dsRow[1] +" LEARN:" + ( (i/(double)dataBuffer.size()) < percentageThreshold ? 0 : (i/(double)dataBuffer.size())  ));
+            }
+            try {
+                Files.write(Paths.get("export.txt"), csv.getBytes(), StandardOpenOption.APPEND);
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+            /*
+            if(ds.size() > 0) {
+                System.out.println("Start learning - elements: " + ds.size());
+                BackPropagation backPropagation = new BackPropagation();
+                backPropagation.setMaxIterations(10000);
+                ann.learn(ds, backPropagation);
+                System.out.println("End learning");
+                ds.clear();
+            } */
+        }
     }
 
     private NeuralNetwork getNewNetwork() {
